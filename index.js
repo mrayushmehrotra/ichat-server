@@ -4,34 +4,40 @@ const cors = require("cors");
 const socketIO = require("socket.io");
 const { ppid, disconnect } = require("process");
 
-const users=[{}]
+const users = [{}];
 const app = express();
-const port = 4500 || process.env.PORT
-app.use(cors())
+const port = 4500 || process.env.PORT;
+app.use(cors());
 const server = http.createServer(app);
 const io = socketIO(server);
-app.get("/",(req,res)=>{
-    res.send("Server")
-})
+app.get("/", (req, res) => {
+  res.send("Chat Server is working fine");
+});
 
-io.on("connection", (socket)=>{
-    
-    socket.on("joined", ({user})=>{
-        users[socket.id]=user
-       
-        socket.broadcast.emit(`userJoined`, {user:"Admin", message:`${users[socket.id]} has joined`})
-        socket.emit("welcome", {user:"Admin",message:`Welcome To The Chat ${users[socket.id]}`})
-    })
+io.on("connection", (socket) => {
+  socket.on("joined", ({ user }) => {
+    users[socket.id] = user;
 
-    socket.on("message",({message,id})=>{
-        io.emit("sendMessage", {user:users[socket.id],message,id});
-    })
+    socket.broadcast.emit(`userJoined`, {
+      user: "Admin",
+      message: `${users[socket.id]} has joined`,
+    });
+    socket.emit("welcome", {
+      user: "Admin",
+      message: `Welcome To The Chat ${users[socket.id]}`,
+    });
+  });
 
-    socket.on("disconnected", ()=>{
-        socket.broadcast.emit("leave", {user:"Admin", message: `${users[socket.id]} has left`})
-    })
-})
+  socket.on("message", ({ message, id }) => {
+    io.emit("sendMessage", { user: users[socket.id], message, id });
+  });
 
-server.listen(port, (()=>{
-    console.log(`server is working on http://localhost:${port}`)
-}))
+  socket.on("disconnected", () => {
+    socket.broadcast.emit("leave", {
+      user: "Admin",
+      message: `${users[socket.id]} has left`,
+    });
+  });
+});
+
+server.listen(port);
