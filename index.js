@@ -11,7 +11,10 @@ app.use(cors());
 const server = http.createServer(app);
 const io = socketIO(server);
 app.get("/", (req, res) => {
-  res.send("Chat Server is working fine");
+  res.status(200).json({
+    success: true,
+    message: "Server is working fine",
+  });
 });
 
 io.on("connection", (socket) => {
